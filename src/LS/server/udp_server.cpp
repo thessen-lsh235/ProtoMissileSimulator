@@ -29,9 +29,10 @@ int main() {
                                     (sockaddr*)&client_addr, &addr_len);
         if (recv_len > 0) {
             MissileInfo missile;
-            missile.fromBytes(buffer);
+            missile.fromBytes(std::vector<uint8_t>(buffer.begin() + 1, buffer.end()));
 
             std::cout << "\nMissile Fire:\n";
+            std::cout << "  ID: " << missile.missile_id << "\n";
             std::cout << "  POS: (" << missile.LS_pos_x << ", " << missile.LS_pos_y << ")\n";
             std::cout << "  SPD: " << missile.speed << "\n";
             std::cout << "  ANG: " << missile.degree << "\n";
