@@ -1,25 +1,16 @@
 #include <iostream>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <cstring>
-#include <iomanip>
-#include "launch_protocol.h"
+#include <vector>
+#include "missile.h"
 
 #define PORT 9000
 
 int main() {
-    int sock;
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);
     sockaddr_in server_addr{}, client_addr{};
     socklen_t addr_len = sizeof(client_addr);
 
-    // 소켓 생성
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sock < 0) {
-        perror("socket error");
-        return 1;
-    }
-
-    // 바인딩
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(PORT);
     server_addr.sin_addr.s_addr = INADDR_ANY;
@@ -30,24 +21,20 @@ int main() {
         return 1;
     }
 
-    std::cout << "[UDP server start] PORT: " << PORT << "\n";
+    std::cout << "[UDP server start] PORT: " << PORT << "\n";    
 
     while (true) {
-        LaunchCommand cmd{};
-        int recv_len = recvfrom(sock, &cmd, sizeof(cmd), 0,
-                                (sockaddr*)&client_addr, &addr_len);
+        std::vector<uint8_t> buffer(sizeof(MissileInfo));
+        ssize_t recv_len = recvfrom(sock, buffer.data(), buffer.size(), 0,
+                                    (sockaddr*)&client_addr, &addr_len);
+        if (recv_len > 0) {
+            MissileInfo missile;
+            missile.fromBytes(buffer);
 
-        if (recv_len == sizeof(cmd)) {
-            std::cout << "\n FIRE COMMAND is successfully received:\n";
-            std::cout << std::fixed << std::setprecision(6);
-            std::cout << "\tMSG_TYPE       : " << cmd.msg_type << "\n";
-            std::cout << "\tLAUNCHER_ID    : " << cmd.launcher_id << "\n";
-            std::cout << "\tLAUNCHER_X     : " << cmd.x << "\n";
-            std::cout << "\tLAUNCHER_Y     : " << cmd.y << "\n";
-            std::cout << "\tLAUNCHER_ANGLE : " << cmd.angle << "\n";
-        } else {
-            std::cerr << "received data size error ("
-                      << recv_len << " bytes)\n";
+            std::cout << "\nMissile Fire:\n";
+            std::cout << "  POS: (" << missile.LS_pos_x << ", " << missile.LS_pos_y << ")\n";
+            std::cout << "  SPD: " << missile.speed << "\n";
+            std::cout << "  ANG: " << missile.degree << "\n";
         }
     }
 

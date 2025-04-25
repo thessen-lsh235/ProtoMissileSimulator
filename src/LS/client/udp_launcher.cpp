@@ -1,54 +1,20 @@
-#include <iostream>
-#include <string>
-#include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include "ini.h"
-#include "launch_protocol.h"
-
-// 설정 구조체
-struct LauncherConfig {
-    std::string id;
-    double x;
-    double y;
-    double angle = 0.0;  // 기본 발사각: 진북
-};
-
-// INI 파서 콜백
-static int handler(void* user, const char* section, const char* name, const char* value) {
-    LauncherConfig* config = (LauncherConfig*)user;
-
-    if (std::string(section) == "LAUNCHER") {
-        if (std::string(name) == "ID") config->id = value;
-        else if (std::string(name) == "X") config->x = std::stod(value);
-        else if (std::string(name) == "Y") config->y = std::stod(value);
-        else if (std::string(name) == "ANGLE") config->angle = std::stod(value); // 선택적
-    }
-    return 1;
-}
-
-// INI 읽기
-LauncherConfig read_launcher_config(const std::string& filename) {
-    LauncherConfig config;
-    if (ini_parse(filename.c_str(), handler, &config) < 0) {
-        std::cerr << "INI file read error: " << filename << std::endl;
-        exit(1);
-    }
-    return config;
-}
+#include <iostream>
+#include "missile.h"  // MissileInfo 포함
 
 int main() {
-    LauncherConfig config = read_launcher_config("../launcher_config.ini");
-    
-    // 구조체 구성
-    LaunchCommand cmd{};
-    strncpy(cmd.msg_type, "LAUNCH", sizeof(cmd.msg_type));
-    strncpy(cmd.launcher_id, config.id.c_str(), sizeof(cmd.launcher_id));
-    cmd.x = config.x;
-    cmd.y = config.y;
-    cmd.angle = config.angle;
+    // 1. 발사 정보 설정
+    MissileInfo missile;
+    missile.LS_pos_x = 176431.680592;
+    missile.LS_pos_y = 140854.998730;
+    missile.speed = 400;          // 예시 속도
+    missile.degree = 0.0;          // 진북 기준 발사각
 
-    // UDP 소켓 생성
+    // 2. 직렬화 (바이너리 변환)
+    std::vector<uint8_t> packet = missile.toBytes();
+    
+    // 3. UDP 전송
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
         perror("socket creation failed");
@@ -60,13 +26,12 @@ int main() {
     server_addr.sin_port = htons(9000);
     inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
 
-    // 구조체 송신
-    int sent = sendto(sock, &cmd, sizeof(cmd), 0,
-                      (sockaddr*)&server_addr, sizeof(server_addr));
+    ssize_t sent = sendto(sock, packet.data(), packet.size(), 0,
+                          (sockaddr*)&server_addr, sizeof(server_addr));
     if (sent < 0) {
         perror("sendto failed");
     } else {
-        std::cout << "[FIRE MESSAGE IS SENT]\n";
+        std::cout << "[Missile Fire Command is sent]\n";
     }
 
     close(sock);
