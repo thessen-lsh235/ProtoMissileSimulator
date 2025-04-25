@@ -55,7 +55,8 @@ int main()
 			{
 				MissileInfo missile;
 				missile.fromBytes(std::vector<uint8_t>(received_data.begin() + 1, received_data.end()));
-				std::cout << "Received MissileInfo - LS_pos_x: " << missile.LS_pos_x
+				std::cout << "Received MissileInfo - missile_id: " << missile.missile_id
+				          << ", LS_pos_x: " << missile.LS_pos_x
 						  << ", LS_pos_y: " << missile.LS_pos_y
 						  << ", Speed: " << missile.speed
 						  << ", Degree: " << missile.degree << std::endl;

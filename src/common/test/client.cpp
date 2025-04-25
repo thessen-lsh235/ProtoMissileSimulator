@@ -46,6 +46,8 @@ int main()
 		{
 			// MissileInfo 객체 생성 및 직렬화
 			MissileInfo missile;
+			std::cout << "Enter missile_id: ";
+			std::cin >> missile.missile_id;
 			std::cout << "Enter LS_pos_x: ";
 			std::cin >> missile.LS_pos_x;
 			std::cout << "Enter LS_pos_y: ";
