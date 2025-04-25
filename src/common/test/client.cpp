@@ -1,4 +1,6 @@
 #include "missile.h"
+#include "target.h"
+#include "type.h"
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -26,19 +28,63 @@ int main()
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr);
 
-	// MissileInfo 객체 생성 및 직렬화
-	MissileInfo missile;
-	missile.LS_pos_x = 10.5;
-	missile.LS_pos_y = 20.5;
-	missile.speed = 300;
-	missile.degree = 45.0;
+	while (true)
+	{
+		std::cout << "Enter message type (1 for Missile, 2 for Target, 0 to exit): ";
+		int message_type;
+		std::cin >> message_type;
 
-	std::vector<uint8_t> serialized_data = missile.toBytes();
+		if (message_type == 0)
+		{
+			std::cout << "Exiting client..." << std::endl;
+			break;
+		}
 
-	// 데이터 전송
-	sendto(socket_fd, serialized_data.data(), serialized_data.size(), 0,
-		   (const struct sockaddr *)&server_addr, sizeof(server_addr));
-	std::cout << "MissileInfo sent to server." << std::endl;
+		std::vector<uint8_t> serialized_data;
+
+		if (message_type == static_cast<int>(DataType::Missile))
+		{
+			// MissileInfo 객체 생성 및 직렬화
+			MissileInfo missile;
+			std::cout << "Enter LS_pos_x: ";
+			std::cin >> missile.LS_pos_x;
+			std::cout << "Enter LS_pos_y: ";
+			std::cin >> missile.LS_pos_y;
+			std::cout << "Enter speed: ";
+			std::cin >> missile.speed;
+			std::cout << "Enter degree: ";
+			std::cin >> missile.degree;
+
+			serialized_data = missile.toBytes();
+		}
+		else if (message_type == static_cast<int>(DataType::Target))
+		{
+			// TargetInfo 객체 생성 및 직렬화
+			TargetInfo target;
+			std::cout << "Enter ID: ";
+			std::cin >> target.id;
+			std::cout << "Enter pos_x: ";
+			std::cin >> target.pos_x;
+			std::cout << "Enter pos_y: ";
+			std::cin >> target.pos_y;
+			std::cout << "Enter speed: ";
+			std::cin >> target.speed;
+			std::cout << "Enter degree: ";
+			std::cin >> target.degree;
+
+			serialized_data = target.toBytes();
+		}
+		else
+		{
+			std::cout << "Invalid message type. Please enter 1 for Missile, 2 for Target, or 0 to exit." << std::endl;
+			continue;
+		}
+
+		// 데이터 전송
+		sendto(socket_fd, serialized_data.data(), serialized_data.size(), 0,
+			   (const struct sockaddr *)&server_addr, sizeof(server_addr));
+		std::cout << "Message sent to server." << std::endl;
+	}
 
 	// 소켓 닫기
 	close(socket_fd);

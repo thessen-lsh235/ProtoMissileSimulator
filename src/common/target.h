@@ -1,4 +1,5 @@
 #include "serialize/serializable_base.hpp"
+#include "type.h"
 
 #include <cstring>
 #include <vector>
@@ -16,8 +17,9 @@ struct TargetInfo : public Serializable<TargetInfo>
 
 	std::vector<uint8_t> serializeImpl() const
 	{
-		std::vector<uint8_t> buffer(sizeof(id) + sizeof(pos_x) + sizeof(pos_y) + sizeof(speed) + sizeof(degree));
-		size_t offset = 0;
+		std::vector<uint8_t> buffer(1 + sizeof(id) + sizeof(pos_x) + sizeof(pos_y) + sizeof(speed) + sizeof(degree));
+		buffer[0] = static_cast<uint8_t>(DataType::Target); // TargetInfo 타입 식별자
+		size_t offset = 1;
 		std::memcpy(buffer.data() + offset, &id, sizeof(id));
 		offset += sizeof(id);
 		std::memcpy(buffer.data() + offset, &pos_x, sizeof(pos_x));

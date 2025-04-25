@@ -1,5 +1,6 @@
 #include "missile.h"
 #include "target.h"
+#include "type.h"
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -49,13 +50,30 @@ int main()
 		{
 			std::vector<uint8_t> received_data(buffer, buffer + bytes_received);
 
-			// MissileInfo 역직렬화
-			MissileInfo missile;
-			missile.fromBytes(received_data);
-			std::cout << "Received MissileInfo - LS_pos_x: " << missile.LS_pos_x
-					  << ", LS_pos_y: " << missile.LS_pos_y
-					  << ", Speed: " << missile.speed
-					  << ", Degree: " << missile.degree << std::endl;
+			uint8_t type = received_data[0];
+			if (static_cast<DataType>(type) == DataType::Missile)
+			{
+				MissileInfo missile;
+				missile.fromBytes(std::vector<uint8_t>(received_data.begin() + 1, received_data.end()));
+				std::cout << "Received MissileInfo - LS_pos_x: " << missile.LS_pos_x
+						  << ", LS_pos_y: " << missile.LS_pos_y
+						  << ", Speed: " << missile.speed
+						  << ", Degree: " << missile.degree << std::endl;
+			}
+			else if (static_cast<DataType>(type) == DataType::Target)
+			{
+				TargetInfo target;
+				target.fromBytes(std::vector<uint8_t>(received_data.begin() + 1, received_data.end()));
+				std::cout << "Received TargetInfo - ID: " << target.id
+						  << ", Pos_x: " << target.pos_x
+						  << ", Pos_y: " << target.pos_y
+						  << ", Speed: " << target.speed
+						  << ", Degree: " << target.degree << std::endl;
+			}
+			else
+			{
+				std::cerr << "Unknown data type received: " << static_cast<int>(type) << std::endl;
+			}
 		}
 	}
 
