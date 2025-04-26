@@ -6,10 +6,11 @@
 int main() {
     // 1. 발사 정보 설정
     MissileInfo missile;
+    missile.missile_id = 1;
     missile.LS_pos_x = 176431.680592;
     missile.LS_pos_y = 140854.998730;
     missile.speed = 400;          // 예시 속도
-    missile.degree = 0.0;          // 진북 기준 발사각
+    missile.degree = 123.44;          // 진북 기준 발사각
 
     // 2. 직렬화 (바이너리 변환)
     std::vector<uint8_t> packet = missile.toBytes();

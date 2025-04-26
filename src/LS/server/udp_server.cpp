@@ -2,6 +2,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <vector>
+#include <iomanip>
 #include "missile.h"
 
 #define PORT 9000
@@ -30,9 +31,9 @@ int main() {
         if (recv_len > 0) {
             MissileInfo missile;
             missile.fromBytes(std::vector<uint8_t>(buffer.begin() + 1, buffer.end()));
-
             std::cout << "\nMissile Fire:\n";
             std::cout << "  ID: " << missile.missile_id << "\n";
+            std::cout << std::fixed << std::setprecision(6);
             std::cout << "  POS: (" << missile.LS_pos_x << ", " << missile.LS_pos_y << ")\n";
             std::cout << "  SPD: " << missile.speed << "\n";
             std::cout << "  ANG: " << missile.degree << "\n";
