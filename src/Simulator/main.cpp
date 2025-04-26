@@ -1,38 +1,40 @@
 #include "Entities.h"
 #include "EntityFactory.h"
 #include "UDPServer.h"
-#include "common.h"
-#include "util.h" // get_val 함수 사용을 위해 포함
-#include <vector>
-#include <thread>
 #include <atomic>
 #include <iostream>
+#include <thread>
+#include <vector>
 
-// ---------- 유틸리티 함수 제거 ----------
-// get_val 함수는 util.cpp로 이동되었습니다.
+#include "missile.h"
+#include "target.h"
 
-void registerUdpHandlers(UDPServer& server, std::vector<std::unique_ptr<Entity>>& entities) {
-    server.setMessageHandler([&entities](const std::string& msg) {
+void registerUdpHandlers(UDPServer &server, std::vector<std::unique_ptr<Entity>> &entities) {
+    server.setMessageHandler([&entities](const std::vector<uint8_t> &received_data) {
         try {
-            if (msg.find("\"type\":\"missile\"") != std::string::npos) {
-                Missile missile = Missile::fromString(msg);
-                entities.push_back(EntityFactory::createMissile(missile.name, {missile.pos[0], missile.pos[1], missile.pos[2]}, {missile.vel[0], missile.vel[1], missile.vel[2]}));
-                std::cout << "[UDP] 미사일 생성: " << missile.name << std::endl;
-            } else if (msg.find("\"type\":\"target\"") != std::string::npos) {
-                Target target = Target::fromString(msg);
-                entities.push_back(EntityFactory::createTarget(target.name, {target.pos[0], target.pos[1], target.pos[2]}, {target.vel[0], target.vel[1], target.vel[2]}));
-                std::cout << "[UDP] 표적 생성: " << target.name << std::endl;
+            // 데이터 타입 확인 및 처리
+            uint8_t type = received_data[0];
+            if (static_cast<DataType>(type) == DataType::Missile) {
+                MissileInfo missile;
+                missile.deserializeImpl(received_data);
+                std::cout << "Received MissileInfo - missile_id: " << missile.missile_id << ", LS_pos_x: " << missile.LS_pos_x
+                          << ", LS_pos_y: " << missile.LS_pos_y << ", Speed: " << missile.speed << ", Degree: " << missile.degree
+                          << std::endl;
+            } else if (static_cast<DataType>(type) == DataType::Target) {
+                TargetInfo target;
+                target.deserializeImpl(received_data);
+                std::cout << "Received TargetInfo - ID: " << target.id << ", Pos_x: " << target.pos_x << ", Pos_y: " << target.pos_y
+                          << ", Speed: " << target.speed << ", Degree: " << target.degree << std::endl;
             } else {
-                std::cerr << "[UDP] 알 수 없는 명령 유형: " << msg << std::endl;
+                std::cerr << "Unknown data type received: " << static_cast<int>(type) << std::endl;
             }
-        } catch (const std::exception& e) {
-            std::cerr << "[UDP] 명령 처리 중 오류 발생: " << e.what() << " | 메시지: " << msg << std::endl;
+        } catch (const std::exception &e) {
+            std::cerr << "[UDP] 명령 처리 중 오류 발생: " << e.what() << std::endl;
         }
     });
 }
 
-int main()
-{
+int main() {
     // UDP 서버 시작
     UDPServer server(9000);
     std::atomic<bool> server_running(true);
