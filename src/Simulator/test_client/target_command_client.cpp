@@ -1,6 +1,6 @@
 // target_command_client.cpp
 // 표적 명령을 시뮬레이터 서버로 전송하는 테스트 클라이언트
-#include "target.h"
+#include "targetInfo.h"
 #include <arpa/inet.h>
 #include <cstring>
 #include <iostream>
@@ -24,9 +24,10 @@ int main() {
 
     // Target 명령 생성
     TargetInfo target;
-    target.id = 1;        // 예시 ID
-    target.pos_x = 100.0; // x 좌표
-    target.pos_y = 200.0; // y 좌표
+    std::cout << "Enter target name: ";
+    std::cin.getline(target.name, sizeof(target.name));
+    target.pos_x = 100.0; // 초기 x 좌표
+    target.pos_y = 200.0; // 초기 y 좌표
     target.speed = 50;    // 속도
     target.degree = 90.0; // 이동 각도
 
@@ -40,8 +41,8 @@ int main() {
         close(sockfd);
         return 1;
     }
-    std::cout << "표적 명령 전송 완료: ID=" << target.id << ", Pos=(" << target.pos_x << ", " << target.pos_y << "), Speed=" << target.speed
-              << ", Degree=" << target.degree << std::endl;
+    std::cout << "표적 명령 전송 완료: Name=" << target.name << ", Pos=(" << target.pos_x << ", " << target.pos_y
+              << "), Speed=" << target.speed << ", Degree=" << target.degree << std::endl;
 
     close(sockfd);
     return 0;

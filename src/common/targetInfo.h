@@ -8,7 +8,7 @@
 
 #pragma pack(push, 1) // 1바이트 단위로 정렬
 struct TargetInfo : public Serializable<TargetInfo> {
-    int id;        // 표적 ID
+    char name[20]; // 표적 이름 (최대 20자)
     double pos_x;  // x 좌표
     double pos_y;  // y 좌표
     int speed;     // 속도

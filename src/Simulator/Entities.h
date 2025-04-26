@@ -1,57 +1,22 @@
 #pragma once
+#include <fmt/format.h>
+#include <stdexcept>
 #include <string>
 
-struct Vector3
-{
-    float x, y, z;
-};
+class Entity {
+  protected:
+    static constexpr double MAP_SIZE_X = 5000.0; // 맵의 최대 x 크기
+    static constexpr double MAP_SIZE_Y = 5000.0; // 맵의 최대 y 크기
 
-class Entity
-{
-public:
-    Entity(const std::string &name, const Vector3 &position, const Vector3 &velocity)
-        : name(name), position(position), velocity(velocity) {}
+    // 맵 경계 초과 여부 확인
+    void checkBounds(const std::string &name, double x, double y) const {
+        if (x < 0 || x > MAP_SIZE_X || y < 0 || y > MAP_SIZE_Y) {
+            fmt::print("[{}] Entity out of bounds and removed - x: {:.2f}, y: {:.2f}\n", name, x, y);
+            throw std::runtime_error(fmt::format("[{}] Entity removed due to out-of-bounds", name));
+        }
+    }
 
+  public:
+    virtual void updatePosition(double delta_time) = 0;
     virtual ~Entity() = default;
-
-    virtual void update() = 0;
-
-    const std::string &getName() const { return name; }
-    const Vector3 &getPosition() const { return position; }
-    const Vector3 &getVelocity() const { return velocity; }
-
-protected:
-    std::string name;
-    Vector3 position;
-    Vector3 velocity;
-};
-
-class SimTarget : public Entity
-{
-public:
-    SimTarget(const std::string &name, const Vector3 &position, const Vector3 &velocity)
-        : Entity(name, position, velocity) {}
-
-    void update() override
-    {
-        // Update target position based on velocity
-        position.x += velocity.x;
-        position.y += velocity.y;
-        position.z += velocity.z;
-    }
-};
-
-class SimMissile : public Entity
-{
-public:
-    SimMissile(const std::string &name, const Vector3 &position, const Vector3 &velocity)
-        : Entity(name, position, velocity) {}
-
-    void update() override
-    {
-        // Update missile position based on velocity
-        position.x += velocity.x;
-        position.y += velocity.y;
-        position.z += velocity.z;
-    }
 };
