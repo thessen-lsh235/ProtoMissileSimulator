@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/lc.dir/main.cpp.o -o ../bin/lc  client/liblc_client.a server/liblc_server.a serial/liblc_serial.a logger/liblc_logger.a 

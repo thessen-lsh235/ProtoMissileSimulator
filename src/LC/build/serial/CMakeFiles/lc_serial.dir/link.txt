@@ -1,0 +1,2 @@
+/usr/bin/ar qc liblc_serial.a CMakeFiles/lc_serial.dir/lc_serial.cpp.o
+/usr/bin/ranlib liblc_serial.a
