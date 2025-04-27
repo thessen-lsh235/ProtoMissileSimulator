@@ -30,7 +30,7 @@ int main() {
                                     (sockaddr*)&client_addr, &addr_len);
         if (recv_len > 0) {
             MissileInfo missile;
-            missile.fromBytes(std::vector<uint8_t>(buffer.begin() + 1, buffer.end()));
+            missile.fromBytes(buffer);
             std::cout << "\nMissile Fire:\n";
             std::cout << "  ID: " << missile.missile_id << "\n";
             std::cout << std::fixed << std::setprecision(6);
