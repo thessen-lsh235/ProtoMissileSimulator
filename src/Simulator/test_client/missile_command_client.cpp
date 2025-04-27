@@ -1,7 +1,8 @@
 // missile_command_client.cpp
 // 미사일 발사 명령을 시뮬레이터 서버로 전송하는 테스트 클라이언트
-#include "missile.h"
+#include "missileInfo.h"
 #include <arpa/inet.h>
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <unistd.h>
@@ -22,13 +23,19 @@ int main() {
     servaddr.sin_port = htons(SERVER_PORT);
     inet_pton(AF_INET, SERVER_IP, &servaddr.sin_addr);
 
+    // Target의 예상 위치 계산 (10초 뒤)
+    double target_x = 100.0 + 50 * 10 * cos(90.0 * M_PI / 180.0); // x 좌표
+    double target_y = 200.0 + 50 * 10 * sin(90.0 * M_PI / 180.0); // y 좌표
+
     // MissileInfo 생성
     MissileInfo missile;
     missile.missile_id = 1;   // 미사일 ID
     missile.LS_pos_x = 50.0;  // 발사대 x 좌표
     missile.LS_pos_y = 100.0; // 발사대 y 좌표
     missile.speed = 300;      // 미사일 속도
-    missile.degree = 45.0;    // 발사각
+
+    // 미사일 각도 계산
+    missile.degree = atan2(target_y - missile.LS_pos_y, target_x - missile.LS_pos_x) * 180.0 / M_PI;
 
     // MissileInfo를 바이트 배열로 직렬화
     std::vector<uint8_t> serialized_cmd = missile.serializeImpl();
@@ -42,13 +49,6 @@ int main() {
     }
     std::cout << "미사일 발사 명령 전송 완료: ID=" << missile.missile_id << ", LS_pos=(" << missile.LS_pos_x << ", " << missile.LS_pos_y
               << "), Speed=" << missile.speed << ", Degree=" << missile.degree << std::endl;
-
-    // 역직렬화 테스트
-    MissileInfo deserialized_missile;
-    deserialized_missile.deserializeImpl(serialized_cmd);
-    std::cout << "역직렬화된 MissileInfo - missile_id: " << deserialized_missile.missile_id
-              << ", LS_pos_x: " << deserialized_missile.LS_pos_x << ", LS_pos_y: " << deserialized_missile.LS_pos_y
-              << ", Speed: " << deserialized_missile.speed << ", Degree: " << deserialized_missile.degree << std::endl;
 
     close(sockfd);
     return 0;

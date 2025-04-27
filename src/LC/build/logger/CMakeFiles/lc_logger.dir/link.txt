@@ -1,0 +1,2 @@
+/usr/bin/ar qc liblc_logger.a CMakeFiles/lc_logger.dir/lc_logger.cpp.o
+/usr/bin/ranlib liblc_logger.a

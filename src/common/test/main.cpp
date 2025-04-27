@@ -1,5 +1,5 @@
-#include "missile.h"
-#include "target.h"
+#include "missileInfo.h"
+#include "targetInfo.h"
 #include <iostream>
 #include <vector>
 
@@ -28,7 +28,6 @@ int main() {
 
     // Target 객체 생성 및 직렬화
     TargetInfo target;
-    target.id = 2;
     target.pos_x = 100.0;
     target.pos_y = 200.0;
     target.speed = 50;
@@ -44,9 +43,8 @@ int main() {
     // 직렬화된 데이터를 역직렬화
     TargetInfo deserialized_target;
     deserialized_target.deserializeImpl(serialized_target);
-    std::cout << "Deserialized Target - ID: " << deserialized_target.id << ", Pos_x: " << deserialized_target.pos_x
-              << ", Pos_y: " << deserialized_target.pos_y << ", Speed: " << deserialized_target.speed
-              << ", Degree: " << deserialized_target.degree << std::endl;
+    std::cout << "Deserialized Target - Pos_x: " << deserialized_target.pos_x << ", Pos_y: " << deserialized_target.pos_y
+              << ", Speed: " << deserialized_target.speed << ", Degree: " << deserialized_target.degree << std::endl;
 
     return 0;
 }
