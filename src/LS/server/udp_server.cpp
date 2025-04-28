@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <vector>
 #include <iomanip>
-#include "missile.h"
+#include "missileInfo.h"
 
 #define PORT 9000
 
@@ -25,12 +25,16 @@ int main() {
     std::cout << "[UDP server start] PORT: " << PORT << "\n";    
 
     while (true) {
-        std::vector<uint8_t> buffer(sizeof(MissileInfo));
-        ssize_t recv_len = recvfrom(sock, buffer.data(), buffer.size(), 0,
+        // std::vector<uint8_t> buffer(sizeof(MissileInfo));
+        uint8_t buffer[1024];
+        ssize_t recv_len = recvfrom(sock, buffer, sizeof(buffer), 0,
                                     (sockaddr*)&client_addr, &addr_len);
         if (recv_len > 0) {
             MissileInfo missile;
-            missile.fromBytes(buffer);
+            std::vector<uint8_t> received_data(buffer, buffer + recv_len);
+            missile.fromBytes(received_data);
+            std::cout << "\nrecv_len size: " << recv_len << "\n";
+            std::cout << "\nMissile data size: " << sizeof(missile) << "\n";
             std::cout << "\nMissile Fire:\n";
             std::cout << "  ID: " << missile.missile_id << "\n";
             std::cout << std::fixed << std::setprecision(6);

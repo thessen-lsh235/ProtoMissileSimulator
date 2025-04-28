@@ -1,4 +1,4 @@
-#include "missile.h" // MissileInfo 구조체 포함
+#include "missileInfo.h" // MissileInfo 구조체 포함
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <vector>

@@ -3,10 +3,10 @@
 #include <unistd.h>
 #include <termios.h>
 #include <cstring>
-#include "missile.h"
+#include "missileInfo.h"
 #include "ini.h" // inih 라이브러리 추가
 
-#define SERIAL_PORT "/dev/pts/8"
+#define SERIAL_PORT "/dev/pts/12"
 #define BAUD_RATE B115200
 #define INI_FILE_PATH "../launcher_config.ini"
 
@@ -97,7 +97,7 @@ int main() {
     while (true) {
         LaunchCommand cmd{};
         ssize_t read_len = read(serial_fd, &cmd, sizeof(cmd));
-
+        std::cout << "read_len: " << read_len << "\n";
         if (read_len == sizeof(cmd)) {
             std::cout << "\n[LaunchCommand 수신 완료]\n";
             std::cout << "  발사대 ID : " << cmd.launcher_id << "\n";
@@ -115,6 +115,7 @@ int main() {
                 missile.LS_pos_y = launcher_y;
 
                 std::cout << "[Launcher Config Loaded] X: " << launcher_x << ", Y: " << launcher_y << "\n";
+                std::cout << "size of missile data: " << sizeof(missile) << "\n";
                 sendMissile(missile);
             } else {
                 std::cerr << "Failed to load launcher position.\n";

@@ -5,7 +5,7 @@
 #include <cstring>
 
 // UART 설정
-#define SERIAL_PORT "/dev/pts/7"
+#define SERIAL_PORT "/dev/pts/11"
 #define BAUD_RATE B115200
 
 #pragma pack(push, 1)
