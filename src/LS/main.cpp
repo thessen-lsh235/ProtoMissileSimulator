@@ -2,7 +2,7 @@
 #include "server/uart_server.h"
 
 int main() {
-    initLauncherConfig("common/launcher_config.ini");
+    initLauncherConfig("../common/launcher_config.ini");
     runUartServer(); // UART 서버 실행
     return 0;
 }

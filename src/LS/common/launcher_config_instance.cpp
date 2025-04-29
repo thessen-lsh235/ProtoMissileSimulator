@@ -1,9 +1,9 @@
-#include "launcher_config.h"
-#include "ini_parser.h" 
+#include "launcher_config_instance.h"
+#include "ini_parser.h"
 #include <sstream>
 #include <iostream>
 
-LauncherConfig g_launcher_config;
+LauncherConfig g_launcher_config;  
 
 void initLauncherConfig(const std::string& ini_path) {
     IniParser parser;
@@ -23,8 +23,18 @@ void initLauncherConfig(const std::string& ini_path) {
         g_launcher_config.missile_ids.push_back(std::stoi(token));
     }
 
+    if (section.find("MODE") != section.end()) {
+        g_launcher_config.mode = LauncherConfig::stringToMode(section["MODE"]);
+    }
+
+    if (section.find("FAULT") != section.end()) {
+        g_launcher_config.is_faulty = (section["FAULT"] == "1");
+    }
     std::cout << "[LauncherConfig Loaded] ID: " << g_launcher_config.id
-              << ", X: " << g_launcher_config.x
-              << ", Y: " << g_launcher_config.y
-              << ", MISSILES: " << g_launcher_config.missile_count << "\n";
+              << "\n X: " << g_launcher_config.x
+              << "\n Y: " << g_launcher_config.y
+              << "\n MISSILES: " << g_launcher_config.missile_count
+              << "\n MODE: " << (g_launcher_config.mode == OperationMode::ENGAGEMENT ? "ENGAGEMENT" : "MOVEMENT")
+              << "\n FAULTY: " << (g_launcher_config.is_faulty ? "YES" : "NO")
+              << "\n";
 }

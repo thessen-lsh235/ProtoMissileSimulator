@@ -1,4 +1,7 @@
 #include "launcher_config.h"
+#include "launcher_config_handler.h"
+#include "missileInfo.h"
+#include "launchCommand.h"
 #include "udp_launcher.h"
 #include <iostream>
 #include <unistd.h>
@@ -6,16 +9,9 @@
 #include <termios.h>
 #include <cstring>
 
-#define SERIAL_PORT "/dev/pts/12"
+// UART 설정
+#define SERIAL_PORT "/dev/pts/8"
 #define BAUD_RATE B115200
-
-#pragma pack(push, 1)
-struct LaunchCommand {
-    int launcher_id;
-    int missile_id;
-    double launch_angle;
-};
-#pragma pack(pop)
 
 bool setupSerialPort(int fd) {
     struct termios options;
@@ -38,11 +34,36 @@ bool setupSerialPort(int fd) {
         perror("tcsetattr");
         return false;
     }
-
     return true;
 }
 
+// LauncherConfig를 UART로 전송하는 함수
+void sendLauncherStatusOverSerial(const LauncherConfig& config) {
+    int serial_fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY);
+    if (serial_fd < 0) {
+        perror("Failed to open serial port for status");
+        return;
+    }
+
+    if (!setupSerialPort(serial_fd)) {
+        close(serial_fd);
+        return;
+    }
+
+    // 간단히 LauncherConfig 구조체 자체를 바이너리로 전송
+    ssize_t sent = write(serial_fd, &config, sizeof(config));
+    if (sent > 0) {
+        std::cout << "[발사대 상태 전송 완료] (" << sent << " bytes)\n";
+    } else {
+        perror("UART 상태 전송 실패");
+    }
+
+    close(serial_fd);
+}
+
 void runUartServer() {
+    setLauncherStatusHandler(sendLauncherStatusOverSerial);  // ✅ 이벤트 핸들러 등록
+
     int serial_fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY);
     if (serial_fd < 0) {
         perror("Failed to open serial port");
@@ -68,6 +89,12 @@ void runUartServer() {
             std::cout << "  미사일 ID : " << cmd.missile_id << "\n";
             std::cout << "  발사각    : " << cmd.launch_angle << " 도\n";
 
+            // 예시: 발사각 변경시 발사대 상태도 업데이트
+            extern LauncherConfig g_launcher_config;
+            g_launcher_config.x += 10; // (ex) 발사 후 위치 이동했다고 가정
+            notifyLauncherStatusChanged();  // ⚡ 속성 변경 알림
+
+            // 원래 missile 발사
             MissileInfo missile;
             missile.missile_id = cmd.missile_id;
             missile.speed = default_speed;
