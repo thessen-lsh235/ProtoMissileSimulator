@@ -1,14 +1,13 @@
+#include "launcher_config.h"
+#include "udp_launcher.h"
 #include <iostream>
-#include <fcntl.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <termios.h>
 #include <cstring>
-#include "missileInfo.h"
-#include "ini.h" // inih 라이브러리 추가
 
 #define SERIAL_PORT "/dev/pts/12"
 #define BAUD_RATE B115200
-#define INI_FILE_PATH "../launcher_config.ini"
 
 #pragma pack(push, 1)
 struct LaunchCommand {
@@ -18,9 +17,6 @@ struct LaunchCommand {
 };
 #pragma pack(pop)
 
-extern void sendMissile(const MissileInfo& missile);
-
-// UART 설정 함수
 bool setupSerialPort(int fd) {
     struct termios options;
     if (tcgetattr(fd, &options) < 0) {
@@ -46,48 +42,16 @@ bool setupSerialPort(int fd) {
     return true;
 }
 
-// launcher_config.ini 읽기 함수
-struct LauncherConfig {
-    double x;
-    double y;
-};
-
-int iniHandler(void* user, const char* section, const char* name, const char* value) {
-    LauncherConfig* config = (LauncherConfig*)user;
-
-    if (strcmp(section, "LAUNCHER") == 0) {
-        if (strcmp(name, "X") == 0) {
-            config->x = atof(value);
-        } else if (strcmp(name, "Y") == 0) {
-            config->y = atof(value);
-        }
-    }
-    return 1;
-}
-
-bool readLauncherPosition(double& x, double& y) {
-    LauncherConfig config{};
-
-    if (ini_parse(INI_FILE_PATH, iniHandler, &config) < 0) {
-        std::cerr << "Cannot load launcher_config.ini\n";
-        return false;
-    }
-
-    x = config.x;
-    y = config.y;
-    return true;
-}
-
-int main() {
+void runUartServer() {
     int serial_fd = open(SERIAL_PORT, O_RDWR | O_NOCTTY);
     if (serial_fd < 0) {
         perror("Failed to open serial port");
-        return 1;
+        return;
     }
 
     if (!setupSerialPort(serial_fd)) {
         close(serial_fd);
-        return 1;
+        return;
     }
 
     std::cout << "[UART Server Start] Listening on " << SERIAL_PORT << "\n";
@@ -97,7 +61,7 @@ int main() {
     while (true) {
         LaunchCommand cmd{};
         ssize_t read_len = read(serial_fd, &cmd, sizeof(cmd));
-        std::cout << "read_len: " << read_len << "\n";
+
         if (read_len == sizeof(cmd)) {
             std::cout << "\n[LaunchCommand 수신 완료]\n";
             std::cout << "  발사대 ID : " << cmd.launcher_id << "\n";
@@ -108,18 +72,10 @@ int main() {
             missile.missile_id = cmd.missile_id;
             missile.speed = default_speed;
             missile.degree = cmd.launch_angle;
+            missile.LS_pos_x = g_launcher_config.x;
+            missile.LS_pos_y = g_launcher_config.y;
 
-            double launcher_x = 0, launcher_y = 0;
-            if (readLauncherPosition(launcher_x, launcher_y)) {
-                missile.LS_pos_x = launcher_x;
-                missile.LS_pos_y = launcher_y;
-
-                std::cout << "[Launcher Config Loaded] X: " << launcher_x << ", Y: " << launcher_y << "\n";
-                std::cout << "size of missile data: " << sizeof(missile) << "\n";
-                sendMissile(missile);
-            } else {
-                std::cerr << "Failed to load launcher position.\n";
-            }
+            sendMissile(missile);
         } else if (read_len > 0) {
             std::cerr << "Partial data received (" << read_len << " bytes)\n";
         } else if (read_len < 0) {
@@ -131,5 +87,4 @@ int main() {
     }
 
     close(serial_fd);
-    return 0;
 }

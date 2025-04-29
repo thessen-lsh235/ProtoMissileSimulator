@@ -1,4 +1,4 @@
-#include "missileInfo.h" // MissileInfo 구조체 포함
+#include "udp_launcher.h"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <vector>
@@ -19,7 +19,7 @@ void sendMissile(const MissileInfo& missile) {
     server_addr.sin_port = htons(UDP_SERVER_PORT);
     inet_pton(AF_INET, UDP_SERVER_IP, &server_addr.sin_addr);
 
-    std::vector<uint8_t> packet = missile.toBytes(); // MissileInfo 직렬화 (toBytes)
+    std::vector<uint8_t> packet = missile.toBytes();
 
     ssize_t sent = sendto(sock, packet.data(), packet.size(), 0,
                           (sockaddr*)&server_addr, sizeof(server_addr));

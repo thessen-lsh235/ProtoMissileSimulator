@@ -13,6 +13,7 @@ struct LaunchCommand {
     int launcher_id;       // 발사대 ID
     int missile_id;        // 미사일 ID
     double launch_angle;   // 발사각
+    int spd;               // 속도
 };
 #pragma pack(pop)
 
@@ -62,6 +63,8 @@ int main() {
         std::cin >> cmd.missile_id;
         std::cout << "발사각 입력 (도 단위): ";
         std::cin >> cmd.launch_angle;
+        std::cout << "미사일 발사 속도 입력: ";
+        std::cin >> cmd.spd;
 
         ssize_t sent = write(serial_fd, &cmd, sizeof(cmd));
         if (sent > 0) {
