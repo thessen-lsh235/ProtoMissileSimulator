@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <cstring>
+#include <iomanip>
 #include <thread>
 #include "launcher_config.h"
 #include "launcher_message.h"
@@ -43,7 +44,13 @@ void receiveStatusThread(int fd) {
         if (len == sizeof(msg)) {
             std::cout << "\n[발사대 상태 수신 완료]\n";
             std::cout << "  ID           : " << msg.id << "\n";
-            std::cout << "  위치         : (" << msg.x << ", " << msg.y << ")\n";
+
+            // long long → double 변환 (1e-8 스케일)
+            double display_x = static_cast<double>(msg.x) / 1e8;
+            double display_y = static_cast<double>(msg.y) / 1e8;
+            std::cout << std::fixed << std::setprecision(8);
+            std::cout << "  위치         : (" 
+            << msg.x / 1e8 << ", " << msg.y / 1e8 << ")\n";
             std::cout << "  미사일 수    : " << msg.missile_count << "\n";
             std::cout << "  미사일 ID    : ";
             for (int i = 0; i < msg.missile_count; ++i) {
@@ -118,18 +125,24 @@ int main() {
 
             case 2:
                 msg.type = CommandType::MOVE;
+                double input_x, input_y;
                 while (true) {
-                    std::cout << "  이동 X: ";
-                    if (std::cin >> msg.move.new_x) break;
+                    std::cout << "  이동 x (경도): ";
+                    if (std::cin >> input_x) break;
                     std::cerr << "[오류] 숫자를 입력하세요.\n";
                     std::cin.clear(); std::cin.ignore(1000, '\n');
                 }
+                
                 while (true) {
-                    std::cout << "  이동 Y: ";
-                    if (std::cin >> msg.move.new_y) break;
+                    std::cout << "  이동 y (위도): ";
+                    if (std::cin >> input_y) break;
                     std::cerr << "[오류] 숫자를 입력하세요.\n";
                     std::cin.clear(); std::cin.ignore(1000, '\n');
                 }
+                
+                // double → long long으로 스케일 변환
+                msg.move.new_x = static_cast<long long>(input_x * 1e8);
+                msg.move.new_y = static_cast<long long>(input_y * 1e8);
                 break;
 
             case 3:

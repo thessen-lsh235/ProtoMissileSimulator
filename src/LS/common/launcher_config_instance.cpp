@@ -2,6 +2,8 @@
 #include "ini_parser.h"
 #include <sstream>
 #include <iostream>
+#include <cmath>
+#include <iomanip>
 
 LauncherConfig g_launcher_config;  
 
@@ -11,8 +13,8 @@ void initLauncherConfig(const std::string& ini_path) {
     auto section = parser.getSection("LAUNCHER");
 
     g_launcher_config.id = std::stoi(section["ID"]);
-    g_launcher_config.x = std::stod(section["X"]);
-    g_launcher_config.y = std::stod(section["Y"]);
+    g_launcher_config.x = std::stoll(section["X"]);  // long long 직접 파싱
+    g_launcher_config.y = std::stoll(section["Y"]);
     g_launcher_config.missile_count = std::stoi(section["MISSILE_COUNT"]);
 
     std::stringstream ss(section["MISSILE_IDS"]);
@@ -27,10 +29,11 @@ void initLauncherConfig(const std::string& ini_path) {
         g_launcher_config.mode = LauncherConfig::stringToMode(section["MODE"]);
     }
 
-    std::cout << "[LauncherConfig Loaded] ID: " << g_launcher_config.id
-              << "\n X: " << g_launcher_config.x
-              << "\n Y: " << g_launcher_config.y
-              << "\n MISSILES: " << g_launcher_config.missile_count
-              << "\n MODE: " << (g_launcher_config.mode == OperationMode::ENGAGEMENT ? "ENGAGEMENT" : "MOVEMENT")
-              << "\n";
+    std::cout << "[LauncherConfig Loaded] \n";
+    std::cout << std::fixed << std::setprecision(8);
+    std::cout << "  ID       : " << g_launcher_config.id << "\n";
+    std::cout << "  X (경도) : " << g_launcher_config.x / 1e8 << "\n";
+    std::cout << "  Y (위도) : " << g_launcher_config.y / 1e8 << "\n";
+    std::cout << "  MISSILES : " << g_launcher_config.missile_count << "\n";
+    std::cout << "  MODE     : " << LauncherConfig::modeToString(g_launcher_config.mode) << "\n";
 }

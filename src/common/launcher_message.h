@@ -16,8 +16,8 @@ struct LauncherMessage {
     union {
         LaunchCommand launch;
         struct {
-            double new_x;
-            double new_y;
+            long long new_x;
+            long long new_y;
         } move;
         struct {
             OperationMode new_mode;
@@ -32,7 +32,7 @@ struct LauncherMessage {
 #pragma pack(push, 1)
 struct LauncherStatusMessage {
     int id;
-    double x, y;
+    long long x, y; // 경도, 위도
     int missile_count;
     int missile_ids[10];  // 최대 10개로 고정
     OperationMode mode;
