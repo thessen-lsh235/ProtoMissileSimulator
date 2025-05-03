@@ -27,14 +27,10 @@ void initLauncherConfig(const std::string& ini_path) {
         g_launcher_config.mode = LauncherConfig::stringToMode(section["MODE"]);
     }
 
-    if (section.find("FAULT") != section.end()) {
-        g_launcher_config.is_faulty = (section["FAULT"] == "1");
-    }
     std::cout << "[LauncherConfig Loaded] ID: " << g_launcher_config.id
               << "\n X: " << g_launcher_config.x
               << "\n Y: " << g_launcher_config.y
               << "\n MISSILES: " << g_launcher_config.missile_count
               << "\n MODE: " << (g_launcher_config.mode == OperationMode::ENGAGEMENT ? "ENGAGEMENT" : "MOVEMENT")
-              << "\n FAULTY: " << (g_launcher_config.is_faulty ? "YES" : "NO")
               << "\n";
 }

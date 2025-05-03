@@ -8,8 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 # 모든 타겟이 공통 헤더를 사용할 수 있도록 include 등록
 # ------------------------------------------------------------
 include_directories(
-    ../common                      # launcher_config.h, missileInfo.h, type.h, launchCommand.h
-    ../common/ini_parser           # ini_parser.h
+    ${CMAKE_SOURCE_DIR}/../common
+    ${CMAKE_SOURCE_DIR}/../common/ini_parser
     common                         # launcher_config_handler.h (LS 전용 핸들러)
 )
 

@@ -1,10 +1,10 @@
 add_library(uart_server STATIC uart_server.cpp)
 
 target_include_directories(uart_server PRIVATE
-    ${CMAKE_SOURCE_DIR}/src/common
-    ${CMAKE_SOURCE_DIR}/src/common/ini_parser
-    ${CMAKE_SOURCE_DIR}/src/LS/common
-    ${CMAKE_SOURCE_DIR}/src/LS/client   
+    ${CMAKE_SOURCE_DIR}/../common
+    ${CMAKE_SOURCE_DIR}/../common/ini_parser
+    ${CMAKE_SOURCE_DIR}/common
+    ${CMAKE_SOURCE_DIR}/client   
 )
 
 

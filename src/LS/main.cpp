@@ -1,5 +1,5 @@
-#include "common/launcher_config.h"
-#include "server/uart_server.h"
+#include "launcher_config_instance.cpp"
+#include "uart_server.h"
 
 int main() {
     initLauncherConfig("../common/launcher_config.ini");

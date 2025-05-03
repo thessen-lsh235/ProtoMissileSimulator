@@ -15,7 +15,6 @@ struct LauncherConfig {
     int missile_count = 0;       // 가용 미사일 개수
     std::vector<int> missile_ids; // 미사일 ID 리스트
     OperationMode mode = OperationMode::MOVEMENT; // 현재 모드
-    bool is_faulty = false;      // 고장 여부 (true: 고장)
 
     // 문자열을 모드(enum)로 변환
     static OperationMode stringToMode(const std::string& modeStr) {
